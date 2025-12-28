@@ -40,7 +40,7 @@ def load_copyright_info():
             copyright_info = {
                 "_copyright": {
                     "owner": "Paras Chourasiya",
-                    "year": 2024,
+                    "year": 2025,
                     "contact": {
                         "telegram": "@Aotpy",
                         "website": "https://Aotpy.vercel.app"
