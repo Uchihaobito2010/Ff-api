@@ -1,3 +1,14 @@
+"""
+=============================================
+FreeFire API Server
+Copyright (c) 2024 Paras Chourasiya
+Contact Telegram: @Aotpy
+=============================================
+This software is proprietary and confidential.
+Unauthorized copying, distribution, or use is prohibited.
+=============================================
+"""
+
 import asyncio
 import time
 import httpx
@@ -14,28 +25,44 @@ from google.protobuf.message import Message
 from Crypto.Cipher import AES
 import base64
 import random
+import os
 
-@app.route('/')
-def home():
-    """FreeFire API Server - By Paras Chourasiya | Telegram: @Aotpy"""
-    return jsonify({
-        'message': 'FreeFire API Server',
-        'copyright': '© 2024 Paras Chourasiya',
-        'contact': 'Telegram: @Aotpy',
-        'endpoints': ['/player-info', '/refresh']
-    })
+# === COPYRIGHT LOAD ===
+def load_copyright_info():
+    """Load copyright information from JSON file"""
+    try:
+        # Try to load from copyright.json
+        if os.path.exists('copyright.json'):
+            with open('copyright.json', 'r', encoding='utf-8') as f:
+                return json.load(f)
+        else:
+            # If file doesn't exist, create default copyright info
+            copyright_info = {
+                "_copyright": {
+                    "owner": "Paras Chourasiya",
+                    "year": 2024,
+                    "contact": {
+                        "telegram": "@Aotpy",
+                        "email": "",
+                        "website": ""
+                    },
+                    "license": "Proprietary Software",
+                    "notice": "This software is confidential and proprietary. Unauthorized copying, distribution, or use is strictly prohibited.",
+                    "version": "1.0",
+                    "api_name": "FreeFire API Server",
+                    "rights": "All Rights Reserved"
+                }
+            }
+            # Save to file
+            with open('copyright.json', 'w', encoding='utf-8') as f:
+                json.dump(copyright_info, f, indent=2, ensure_ascii=False)
+            return copyright_info
+    except Exception as e:
+        print(f"Error loading copyright info: {e}")
+        return None
 
-@app.route('/player-info')
-@cached_endpoint()
-def get_account_info():
-    """
-    FreeFire Player Info API
-    Copyright (c) 2024 Paras Chourasiya
-    Contact Telegram: @Aotpy
-    """
-    region = request.args.get('region')
-    uid = request.args.get('uid')
-    # ... rest of your code ...
+# Load copyright at startup
+COPYRIGHT_INFO = load_copyright_info()
 
 # === Settings ===
 MAIN_KEY = base64.b64decode('WWcmdGMlREV1aDYlWmNeOA==')
@@ -51,6 +78,13 @@ cache = TTLCache(maxsize=100, ttl=300)
 cached_tokens = defaultdict(dict)
 
 # === Helper Functions ===
+def add_copyright_to_response(response_data):
+    """Add copyright information to response data"""
+    if isinstance(response_data, dict) and COPYRIGHT_INFO:
+        # Merge copyright info with response
+        response_data['_copyright'] = COPYRIGHT_INFO.get('_copyright', {})
+    return response_data
+
 def pad(text: bytes) -> bytes:
     padding_length = AES.block_size - (len(text) % AES.block_size)
     return text + bytes([padding_length] * padding_length)
@@ -172,38 +206,105 @@ def cached_endpoint(ttl=300):
     return decorator
 
 # === Flask Routes ===
+@app.route('/')
+def home():
+    """API Homepage with copyright info"""
+    home_info = {
+        "api_name": "FreeFire API Server",
+        "version": "1.0",
+        "status": "online",
+        "endpoints": [
+            {"path": "/player-info", "method": "GET", "description": "Get player information"},
+            {"path": "/refresh", "method": "GET/POST", "description": "Refresh authentication tokens"},
+            {"path": "/copyright", "method": "GET", "description": "View copyright information"}
+        ],
+        "documentation": "Use /player-info?uid=USER_ID&region=REGION to get player data"
+    }
+    
+    # Add copyright info
+    home_info = add_copyright_to_response(home_info)
+    
+    return jsonify(home_info), 200
+
+@app.route('/copyright')
+def copyright_info():
+    """Endpoint to display copyright information"""
+    if COPYRIGHT_INFO:
+        return jsonify(COPYRIGHT_INFO), 200
+    else:
+        return jsonify({
+            "error": "Copyright information not available",
+            "_copyright": {
+                "owner": "Paras Chourasiya",
+                "contact": "Telegram: @Aotpy",
+                "notice": "All Rights Reserved"
+            }
+        }), 200
+
 @app.route('/player-info')
 @cached_endpoint()
 def get_account_info():
+    """Get FreeFire player information"""
     region = request.args.get('region')
     uid = request.args.get('uid')
 
     # Pehle basic validation
     if not uid:
-        return jsonify({"error": "Please provide UID."}), 400
+        error_response = {
+            "error": "Please provide UID.",
+            "example": "/player-info?uid=123456789&region=IND"
+        }
+        error_response = add_copyright_to_response(error_response)
+        return jsonify(error_response), 400
 
     if not region:
-        return jsonify({"error": "Please provide REGION."}), 400
+        error_response = {
+            "error": "Please provide REGION.",
+            "supported_regions": list(SUPPORTED_REGIONS),
+            "example": "/player-info?uid=123456789&region=IND"
+        }
+        error_response = add_copyright_to_response(error_response)
+        return jsonify(error_response), 400
 
     try:
         # API call
         return_data = asyncio.run(GetAccountInformation(uid, "7", region, "/GetPlayerPersonalShow"))
-
+        
+        # Add copyright info to response
+        return_data = add_copyright_to_response(return_data)
+        
         # Agar data mila toh usko beautify karke bhejo
         formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
         return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
     except Exception as e:
         # Agar koi error aaye toh yeh catch karega
-        return jsonify({"error": "Invalid UID or Region. Please check and try again."}), 500
+        error_response = {
+            "error": "Invalid UID or Region. Please check and try again.",
+            "details": str(e),
+            "supported_regions": list(SUPPORTED_REGIONS)
+        }
+        error_response = add_copyright_to_response(error_response)
+        return jsonify(error_response), 500
 
 @app.route('/refresh', methods=['GET','POST'])
 def refresh_tokens_endpoint():
+    """Refresh authentication tokens"""
     try:
         asyncio.run(initialize_tokens())
-        return jsonify({'message':'Tokens refreshed for all regions.'}),200
+        response = {
+            'message': 'Tokens refreshed for all regions.',
+            'regions': list(SUPPORTED_REGIONS)
+        }
+        response = add_copyright_to_response(response)
+        return jsonify(response), 200
     except Exception as e:
-        return jsonify({'error': f'Refresh failed: {e}'}),500
+        response = {
+            'error': f'Refresh failed: {e}',
+            'status': 'failed'
+        }
+        response = add_copyright_to_response(response)
+        return jsonify(response), 500
 
 # === Startup ===
 async def startup():
@@ -211,5 +312,12 @@ async def startup():
     asyncio.create_task(refresh_tokens_periodically())
 
 if __name__ == '__main__':
+    # Display startup banner
+    print("\n" + "="*50)
+    print("FreeFire API Server")
+    print("Copyright (c) 2024 Paras Chourasiya")
+    print("Contact Telegram: @Aotpy")
+    print("="*50 + "\n")
+    
     asyncio.run(startup())
     app.run(host='0.0.0.0', port=5000, debug=True)
