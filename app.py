@@ -28,6 +28,7 @@ import random
 import os
 
 # === COPYRIGHT LOAD ===
+
 def load_copyright_info():
     """Load copyright information from JSON file"""
     try:
@@ -43,8 +44,7 @@ def load_copyright_info():
                     "year": 2024,
                     "contact": {
                         "telegram": "@Aotpy",
-                        "email": "",
-                        "website": ""
+                        "website": "https://Aotpy.vercel.app"
                     },
                     "license": "Proprietary Software",
                     "notice": "This software is confidential and proprietary. Unauthorized copying, distribution, or use is strictly prohibited.",
@@ -60,7 +60,6 @@ def load_copyright_info():
     except Exception as e:
         print(f"Error loading copyright info: {e}")
         return None
-
 # Load copyright at startup
 COPYRIGHT_INFO = load_copyright_info()
 
