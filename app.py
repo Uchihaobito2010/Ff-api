@@ -43,7 +43,7 @@ def load_copyright_info():
                     "year": 2024,
                     "contact": {
                         "telegram": "@Aotpy",
-                        "website": "https://yourwebsite.com"
+                        "website": "https://Aotpy.vercel.app"
                     },
                     "license": "Proprietary Software",
                     "notice": "This software is confidential and proprietary. Unauthorized copying, distribution, or use is strictly prohibited.",
