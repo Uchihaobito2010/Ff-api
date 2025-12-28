@@ -11,6 +11,7 @@
     "version": "1.0",
     "api_name": "FreeFire API Server",
     "rights": "All Rights Reserved",
-    "disclaimer": "For authorized use only. Any unauthorized access or distribution is illegal."
+    "disclaimer": "For authorized use only. Any unauthorized access or distribution is illegal.",
+    "example": "https://tobi-paras-ff-api.vercel.app/player-info?region=IND&uid=382949294"
   }
 }
