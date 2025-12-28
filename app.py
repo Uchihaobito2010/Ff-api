@@ -28,7 +28,6 @@ import random
 import os
 
 # === COPYRIGHT LOAD ===
-
 def load_copyright_info():
     """Load copyright information from JSON file"""
     try:
@@ -44,13 +43,15 @@ def load_copyright_info():
                     "year": 2024,
                     "contact": {
                         "telegram": "@Aotpy",
-                        "website": "https://Aotpy.vercel.app"
+                        "website": "https://yourwebsite.com"
                     },
                     "license": "Proprietary Software",
                     "notice": "This software is confidential and proprietary. Unauthorized copying, distribution, or use is strictly prohibited.",
                     "version": "1.0",
                     "api_name": "FreeFire API Server",
-                    "rights": "All Rights Reserved"
+                    "rights": "All Rights Reserved",
+                    "disclaimer": "For authorized use only. Any unauthorized access or distribution is illegal.",
+                    "example": "https://tobi-paras-ff-api.vercel.app/player-info?region=IND&uid=382949294"
                 }
             }
             # Save to file
@@ -60,6 +61,7 @@ def load_copyright_info():
     except Exception as e:
         print(f"Error loading copyright info: {e}")
         return None
+
 # Load copyright at startup
 COPYRIGHT_INFO = load_copyright_info()
 
@@ -217,7 +219,12 @@ def home():
             {"path": "/refresh", "method": "GET/POST", "description": "Refresh authentication tokens"},
             {"path": "/copyright", "method": "GET", "description": "View copyright information"}
         ],
-        "documentation": "Use /player-info?uid=USER_ID&region=REGION to get player data"
+        "documentation": "Use /player-info?uid=USER_ID&region=REGION to get player data",
+        "example": {
+            "url": "https://tobi-paras-ff-api.vercel.app/player-info?region=IND&uid=382949294",
+            "description": "Get player info for UID 382949294 in IND region"
+        },
+        "supported_regions": list(SUPPORTED_REGIONS)
     }
     
     # Add copyright info
@@ -251,7 +258,14 @@ def get_account_info():
     if not uid:
         error_response = {
             "error": "Please provide UID.",
-            "example": "/player-info?uid=123456789&region=IND"
+            "example": {
+                "url": "https://tobi-paras-ff-api.vercel.app/player-info?region=IND&uid=382949294",
+                "parameters": {
+                    "uid": "Player UID (required)",
+                    "region": "Region code (required)"
+                }
+            },
+            "sample_request": "/player-info?uid=382949294&region=IND"
         }
         error_response = add_copyright_to_response(error_response)
         return jsonify(error_response), 400
@@ -260,7 +274,8 @@ def get_account_info():
         error_response = {
             "error": "Please provide REGION.",
             "supported_regions": list(SUPPORTED_REGIONS),
-            "example": "/player-info?uid=123456789&region=IND"
+            "example": "https://tobi-paras-ff-api.vercel.app/player-info?region=IND&uid=382949294",
+            "sample_request": "/player-info?uid=382949294&region=IND"
         }
         error_response = add_copyright_to_response(error_response)
         return jsonify(error_response), 400
@@ -281,7 +296,8 @@ def get_account_info():
         error_response = {
             "error": "Invalid UID or Region. Please check and try again.",
             "details": str(e),
-            "supported_regions": list(SUPPORTED_REGIONS)
+            "supported_regions": list(SUPPORTED_REGIONS),
+            "example_request": "https://tobi-paras-ff-api.vercel.app/player-info?region=IND&uid=382949294"
         }
         error_response = add_copyright_to_response(error_response)
         return jsonify(error_response), 500
