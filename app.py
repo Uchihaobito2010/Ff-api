@@ -15,6 +15,28 @@ from Crypto.Cipher import AES
 import base64
 import random
 
+@app.route('/')
+def home():
+    """FreeFire API Server - By Paras Chourasiya | Telegram: @Aotpy"""
+    return jsonify({
+        'message': 'FreeFire API Server',
+        'copyright': '© 2024 Paras Chourasiya',
+        'contact': 'Telegram: @Aotpy',
+        'endpoints': ['/player-info', '/refresh']
+    })
+
+@app.route('/player-info')
+@cached_endpoint()
+def get_account_info():
+    """
+    FreeFire Player Info API
+    Copyright (c) 2024 Paras Chourasiya
+    Contact Telegram: @Aotpy
+    """
+    region = request.args.get('region')
+    uid = request.args.get('uid')
+    # ... rest of your code ...
+
 # === Settings ===
 MAIN_KEY = base64.b64decode('WWcmdGMlREV1aDYlWmNeOA==')
 MAIN_IV = base64.b64decode('Nm95WkRyMjJFM3ljaGpNJQ==')
